@@ -49,9 +49,61 @@ app.use(session({
 
 app.use(cookieParser(process.env.SESSION_SECRET_ARRAY));
 
-require('./passportConfig')(passport);
+require('./config/passportConfig')(passport);
 app.use(passport.initialize());
 app.use(passport.session());
+
+// routes
+app.post('/login', (req, res, next) => {
+    passport.authenticate('local', (err, user, info) => {
+        if (err) throw err;
+        if (!user) {
+             res.send("No user exists");
+        } else {
+            req.login(user, err => {
+                if (err) throw err;
+                req.session.username = user.username;
+                res.send('Successfully authenticated');
+                console.log(req.user);
+            });
+        }
+    })(req, res, next);
+});
+app.post('/register', (req, res) => {
+    User.findOne({
+        username: req.body.username
+    }, async (err, doc) => {
+        if (err) throw err;
+        if (doc) res.send('User already exists');
+        if (!doc) {
+            const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
+            const newUser = new User({
+                username: req.body.username,
+                password: hashedPassword
+            });
+            await newUser.save();
+            res.send('User created');
+        }
+    });
+});
+app.get('/user', (req, res) => {
+    if (!req.session.username) {
+        res.send('error');
+    } else {
+        res.send(req.user); // req.user stores the entire user that has been authenticated inside of it
+    }
+});
+app.post('/logout', (req, res) => {
+    req.logout();
+    req.session.destroy(err => {
+        if (err) {
+            console.log(err);
+        } else {
+            res.send('Logged out');
+        }
+    });
+});
 
 app.listen(process.env.PORT || 3001, () => {
     console.log('Server has started');
