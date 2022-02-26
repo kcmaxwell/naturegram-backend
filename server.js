@@ -37,7 +37,11 @@ app.use(cors({
 
 app.use(session({
     secret: process.env.SESSION_SECRET_ARRAY,
-    resave: true,
+    cookie: {
+        maxAge: 1000 * 60 * 60 *24 * 365,
+        sameSite: 'strict',
+    },
+    resave: false,
     saveUninitialized: true,
     store: MongoStore.create({
         mongoUrl: process.env.MONGODB_URL,
@@ -62,6 +66,7 @@ app.post('/login', (req, res, next) => {
         } else {
             req.login(user, err => {
                 if (err) throw err;
+                req.session.loggedIn = true;
                 req.session.username = user.username;
                 res.send('Successfully authenticated');
                 console.log(req.user);
@@ -88,8 +93,9 @@ app.post('/register', (req, res) => {
     });
 });
 app.get('/user', (req, res) => {
-    if (!req.session.username) {
-        res.send('error');
+    if (!req.session.loggedIn) {
+        console.log("No user session exists");
+        res.send(null);
     } else {
         res.send(req.user); // req.user stores the entire user that has been authenticated inside of it
     }
