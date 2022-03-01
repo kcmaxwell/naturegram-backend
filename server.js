@@ -38,7 +38,7 @@ app.use(cors({
 app.use(session({
     secret: process.env.SESSION_SECRET_ARRAY,
     cookie: {
-        maxAge: 1000 * 60 * 60 *24 * 365,
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
         sameSite: 'strict',
     },
     resave: false,
