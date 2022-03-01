@@ -10,6 +10,7 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 
 const User = require('./models/user');
+const indexRouter = require('./routes/index');
 
 const app = express();
 
@@ -110,6 +111,8 @@ app.post('/logout', (req, res) => {
         }
     });
 });
+
+app.use('/api', indexRouter);
 
 app.listen(process.env.PORT || 3001, () => {
     console.log('Server has started');
