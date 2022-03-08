@@ -9,6 +9,13 @@ const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 
+const aws = require('aws-sdk');
+const credentials = {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+    secretAccessKey : process.env.AWS_SECRET_ACCESS_KEY
+};
+aws.config.update({credentials: credentials, region: 'us-east-1'});
+
 const User = require('./models/user');
 const indexRouter = require('./routes/index');
 

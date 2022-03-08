@@ -11,4 +11,8 @@ router.post('/register', authController.register);
 
 router.get('/user', authController.get_user);
 
+router.get('/check-logged-in', authController.checkLoggedIn);
+
+router.get('/sign-s3', authController.signS3);
+
 module.exports = router;

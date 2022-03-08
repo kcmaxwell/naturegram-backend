@@ -22,6 +22,7 @@
     "nodemon": "^2.0.15"
   },
   "dependencies": {
+    "aws-sdk": "^2.1085.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.19.2",
     "connect-mongo": "^4.6.0",

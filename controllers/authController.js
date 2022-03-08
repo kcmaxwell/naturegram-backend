@@ -1,4 +1,5 @@
 const passport = require('passport');
+const aws = require('aws-sdk');
 
 const User = require('../models/user');
 
@@ -16,6 +17,7 @@ exports.login = function (req, res, next) {
                 if (err) throw err;
                 req.session.loggedIn = true;
                 req.session.username = user.username;
+                req.session.userId = user.userId;
                 res.send('Successfully authenticated');
                 console.log(req.user);
             });
@@ -63,3 +65,38 @@ exports.get_user = function (req, res) {
         res.send(req.user); // req.user stores the entire user that has been authenticated inside of it
     }
 };
+
+exports.checkLoggedIn = function (req, res) {
+    res.send(req.session.loggedIn);
+}
+
+exports.signS3 = function (req, res) {
+    const credentials = {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey : process.env.AWS_SECRET_ACCESS_KEY
+    };
+    aws.config.update({credentials: credentials, region: 'us-east-1'});
+    const s3 = new aws.S3();
+    
+    const s3Params = {
+        Bucket: process.env.S3_BUCKET,
+        Key: req.query.fileName,
+        Expires: 300,
+        ContentType: req.query.fileType,
+        //ACL: 'public-read', // ACL is not used on the current bucket, this would be needed otherwise
+    };
+
+    s3.getSignedUrl('putObject', s3Params, (err, data) => {
+        if (err) {
+            console.log(err);
+            return res.end();
+        }
+
+        const returnData = {
+            signedRequest: data,
+            url: `https://${process.env.S3_BUCKET}.s3.amazonaws.com/${req.query.fileName}`,
+        };
+
+        res.send(returnData);
+    })
+}
