@@ -1,5 +1,6 @@
 const passport = require('passport');
 const aws = require('aws-sdk');
+const bcrypt = require('bcryptjs');
 
 const User = require('../models/user');
 
